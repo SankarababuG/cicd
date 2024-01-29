@@ -1,0 +1,15 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ubuntu
+
+# Run Ansible playbook during the ApplicationStart phase
+# This is just an example, adjust paths and playbook names accordingly
+# Make sure Ansible is installed in your deployment environment
+
+hooks:
+  ApplicationStart:
+    - location: scripts/ansible-play.sh
+      timeout: 600
+      runas: ubuntu
