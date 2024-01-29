@@ -1,0 +1,87 @@
+---
+- name: OpenCart Setup
+  hosts: worker
+  become: true
+
+  vars:
+    opencart_version: "4.0.0.0"
+    opencart_download_url: "https://github.com/opencart/opencart/releases/download/{{ opencart_version }}/opencart-{{ opencart_version }}.zip"
+    opencart_install_dir: "/var/www/html/project"
+
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+
+    - name: Install Apache
+      apt:
+        name: apache2
+        state: present
+
+    - name: Install MySQL Server
+      apt:
+        name: mysql-server
+        state: present
+
+    - name: Install PHP and required modules
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - php
+        - libapache2-mod-php
+        - php-mysql
+        - php-zip
+        - php-gd
+        - php-curl
+        - php-mbstring
+        - php-xml
+        - php-json
+
+    - name: Enable Apache mod_rewrite
+      apache2_module:
+        name: rewrite
+        state: present
+      notify:
+        - Restart Apache
+
+    - name: Download and Extract OpenCart
+      get_url:
+        url: "{{ opencart_download_url }}"
+        dest: "/tmp/opencart-{{ opencart_version }}.zip"
+
+    - name: Create OpenCart Directory
+      file:
+        path: "{{ opencart_install_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Unzip OpenCart
+      unarchive:
+        src: "/tmp/opencart-{{ opencart_version }}.zip"
+        dest: "{{ opencart_install_dir }}"
+        remote_src: yes
+        
+
+    - name: Set Permissions for OpenCart
+      file:
+        path: "{{ opencart_install_dir }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        recurse: yes
+        mode: '0755'
+
+    - name: Move files from upload dir to project dir
+      shell: mv /var/www/html/project/upload/* /var/www/html/project/
+    - name: Rename config file
+      shell: mv /var/www/html/project/config-dist.php /var/www/html/project/config.php
+    - name: Rename config file in admin dir
+      shell: mv /var/www/html/project/admin/config-dist.php /var/www/html/project/admin/config.php
+    
+
+  handlers:
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
