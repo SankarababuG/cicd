@@ -45,6 +45,11 @@
       notify:
         - Restart Apache
 
+    - name: Install Unzip
+      apt:
+        name: unzip
+        state: present
+
     - name: Download and Extract OpenCart
       get_url:
         url: "{{ opencart_download_url }}"
