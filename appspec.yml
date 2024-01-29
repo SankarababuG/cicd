@@ -10,6 +10,6 @@ files:
 
 hooks:
   ApplicationStart:
-    - location: scripts/ansible-play.sh
+    - location: /ansible-play.sh
       timeout: 600
       runas: ubuntu
