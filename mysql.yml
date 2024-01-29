@@ -1,0 +1,39 @@
+---
+- name: MySQL Database and User Creation
+  hosts: worker
+  become: true
+
+  vars:
+    mysql_root_password: "Admin@123"
+    db_name: "proddb"
+    db_user: "prod_user"
+    db_user_password: "nWA&LvRmP&vp6G!+"
+
+  tasks:
+    - name: Install MySQL Python package
+      apt:
+        name: python3-mysqldb
+        state: present
+
+    - name: Create MySQL Database
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    - name: Create MySQL User
+      mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_user_password }}"
+        priv: "{{ db_name }}.*:ALL"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        host: "localhost"
+
+    - name: Flush privileges
+      mysql_query:
+        query: "FLUSH PRIVILEGES;"
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
