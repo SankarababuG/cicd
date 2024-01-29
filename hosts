@@ -1,2 +1,2 @@
 [myservers]
-worker ansible_host=172.31.7.204 ssh_user=ubuntu
+worker ansible_host=172.31.7.170 ssh_user=ubuntu
